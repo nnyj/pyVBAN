@@ -3,8 +3,16 @@ python implementation of the VBAN (VB Audio network) protocol
 Specification here: https://www.vb-audio.com/Voicemeeter/VBANProtocol_Specifications.pdf
 The module supports audio receiving and transmitting + text transmitting 
 
-## Requierments
-Need of the pyaudio module
+## Requirements
+PyAudio
+```cmd
+pip install pipwin
+pipwin install pyaudio
+```
+PyOgg
+```cmd
+pip install git+https://github.com/TeamPyOgg/PyOgg
+```
 
 ## pyVBAN.VBAN_Recv() usage:
 ```python
