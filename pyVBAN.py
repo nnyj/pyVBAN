@@ -3,6 +3,7 @@ import struct
 import pyaudio
 import numpy as np
 import pyogg
+from datetime import datetime
 
 def np_audioop_rms(data, width):
 	"""audioop.rms() using numpy; avoids another dependency for app"""
@@ -144,6 +145,7 @@ class VBAN_Send(object):
 		self.rawPcm = None
 		self.rawData = None
 		self.opus_encoder = None
+		self.last_sent = datetime.now()
 
 	def _constructFrame(self, pcmData):
 		header = b"VBAN"
@@ -186,11 +188,13 @@ class VBAN_Send(object):
 			self.framecounter += 1
 			self.rawPcm = self.stream.read(self.chunkSize)
 
-			# Send packet if audio not silent to conserve bandwidth
+			# Don't send packet if silent for longer than 60 seconds
 			rms = np_audioop_rms(self.rawPcm, 2)
-			if (rms > 0):
+			if (rms > 0 or (datetime.now()-self.last_sent).seconds < 60):
 				self.rawData = self._constructFrame(self.rawPcm)
 				if (len(self.rawData) > 28):
+					if (rms > 0): # Remember timestamp of last non-silent packet
+						self.last_sent = datetime.now()
 					self.sock.sendto(self.rawData, (self.toIp, self.toPort))
 		except Exception as e:
 			print(e)
